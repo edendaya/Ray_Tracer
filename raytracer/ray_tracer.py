@@ -51,14 +51,17 @@ def save_image(image_array, output_file):
     image = Image.fromarray(np.uint8(image_array * 255))  # Convert to 8-bit image
     image.save(output_file)
 
-def intersect_scene(ray, surfaces):
-    closest_intersection = None
+def intersect_scene(ray, surfaces, epsilon=0.000001):
+    intersections = []
     for obj in surfaces:
         intersection = obj.intersect(ray.origin, ray.direction)
-        if intersection:
-            if closest_intersection is None or intersection.distance < closest_intersection.distance:
-                closest_intersection = intersection
-    return closest_intersection
+        if intersection is None or intersection.distance <= epsilon:
+            continue
+        intersections.append(intersection)
+    intersections.sort(key=lambda x: x.distance)
+    if intersections:
+        return intersections[0]
+    return None
 
 def calculate_light_intensity(light, point, normal, view_direction, intersect_scene, surfaces, scene_settings):
     light_direction = light.position - point
@@ -198,6 +201,7 @@ def main():
             closest_intersection = intersect_scene(ray, surfaces)
             
             if closest_intersection:
+                #print(f"closest_intersection: {closest_intersection}")
                 # Compute the intersection point using the distance from the ray
                 point = ray.origin + closest_intersection.distance * ray.direction
                 normal = closest_intersection.normal

@@ -35,4 +35,6 @@ class Sphere:
         
         intersection_point = ray_origin + t1 * ray_direction
         normal = (intersection_point - self.center) / self.radius
-        return Intersection(t1, intersection_point, normal, self.material_index)  # Pass material_index
+        temp = Intersection(t1, intersection_point, normal, self.material_index)  # Pass material_index
+        print(f"intersection result: {temp}")
+        return temp
