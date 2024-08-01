@@ -10,6 +10,8 @@ from surfaces.infinite_plane import InfinitePlane
 from surfaces.sphere import Sphere
 from ray import Ray
 
+MAX_RECURSIONS = 3
+
 def parse_scene_file(file_path):
     surfaces = []
     lights = []
@@ -54,7 +56,7 @@ def save_image(image_array, output_file):
 def intersect_scene(ray, surfaces, epsilon=0.000001):
     intersections = []
     for obj in surfaces:
-        intersection = obj.intersect(ray.origin, ray.direction)
+        intersection = obj.intersect(ray)
         if intersection is None or intersection.distance <= epsilon:
             continue
         intersections.append(intersection)
@@ -127,10 +129,13 @@ def calculate_soft_shadows(light, point, normal, intersect_scene, surfaces, scen
 def compute_lighting(point, normal, ray, closest_intersection, surfaces, materials, lights, scene_settings, depth=0):
     color = np.array(scene_settings.background_color)
 
-    if closest_intersection.material_index < 0 or closest_intersection.material_index >= len(materials):
+    if closest_intersection is None or closest_intersection.material_index < 0 or closest_intersection.material_index >= len(materials):
         return color
 
+    #diffuse_color = np.array([0, 0, 0], dtype='float')
+    #specular_color = np.array([0, 0, 0], dtype='float')
     material = materials[closest_intersection.material_index]
+
     for light in lights:
         view_direction = -ray.direction
         light_intensity = calculate_light_intensity(light, point, normal, view_direction, intersect_scene, surfaces, scene_settings)
@@ -141,18 +146,42 @@ def compute_lighting(point, normal, ray, closest_intersection, surfaces, materia
         specular_color = calculate_specular(light, view_direction, light_direction, normal, light.specular_intensity) * light_intensity
 
         # Apply material colors
-        color += (diffuse_color + specular_color) * material.diffuse_color
-
-    if material.transparency > 0 and depth < scene_settings.max_recursions:
+        color += (diffuse_color * material.diffuse_color)+ (specular_color * material.specular_color)
+    print(f"s_d_color: {color}, diffuse_color: {diffuse_color}, specular_color: {specular_color}")
+    if material.transparency >= 0 and depth < scene_settings.max_recursions:
         reflection_ray = Ray(point, ray.direction)
-        reflected_color = compute_lighting(point, normal, reflection_ray, closest_intersection, surfaces, materials, lights, scene_settings, depth + 1)
+        new_closest_instruction = intersect_scene(ray, surfaces)
+        reflected_color = compute_lighting(point, normal, reflection_ray, new_closest_instruction, surfaces, materials, lights, scene_settings, depth + 1)
         background_color = np.array(scene_settings.background_color)
         color = (background_color * material.transparency +
                  color * (1 - material.transparency) +
                  reflected_color)
-    else:
-        color = np.clip(color, 0, 1)  # Ensure color values are between 0 and 1
+        print(f"color: {color}")
+    #else:
+        #color = np.clip(color, 0, 1)  # Ensure color values are between 0 and 1
+    """
+    for light in lights:
+        view_direction = -ray.direction
+        light_intensity = calculate_light_intensity(light, point, normal, view_direction, intersect_scene, surfaces,
+                                                    scene_settings)
+        light_direction = light.position - point
+        light_direction /= np.linalg.norm(light_direction)
 
+        diffuse_color += calculate_diffuse(light, normal, light_direction) * light_intensity
+        specular_color += calculate_specular(light, view_direction, light_direction, normal,
+                                             light.specular_intensity) * light_intensity
+        #print(f"diffuse_color: {diffuse_color}, specular_color: {specular_color}")
+        # reflection_ray = Ray(point, ray.direction)
+        reflected_color = scene_settings.background_color
+        if depth < MAX_RECURSIONS:
+            reflected_color = compute_lighting(point, normal, ray, closest_intersection, surfaces, materials,
+                                           lights, scene_settings, depth + 1)
+        temp_color = (diffuse_color * material.diffuse_color) + (specular_color * material.specular_color)
+        transparent = material.transparency
+        color = ((1 - transparent) * temp_color + transparent * color) \
+                + reflected_color
+        color = np.clip(color, 0, 1)  # Ensure color values are between 0 and 1
+    """
     return color
 
 def main():
@@ -201,7 +230,7 @@ def main():
             closest_intersection = intersect_scene(ray, surfaces)
             
             if closest_intersection:
-                #print(f"closest_intersection: {closest_intersection}")
+                print(f"closest_intersection: {closest_intersection}")
                 # Compute the intersection point using the distance from the ray
                 point = ray.origin + closest_intersection.distance * ray.direction
                 normal = closest_intersection.normal

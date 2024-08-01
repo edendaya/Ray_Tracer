@@ -6,7 +6,7 @@ class Cube:
         self.scale = scale
         self.material_index = material_index
 
-    def intersect(self, ray_origin, ray_direction):
+    def intersect(self, ray):
         """
         Check for intersection between a ray and the cube.
         Returns the intersection distance if intersected, otherwise returns None.
@@ -15,8 +15,8 @@ class Cube:
         min_bound = self.position - self.scale / 2
         max_bound = self.position + self.scale / 2
 
-        t_min = (min_bound - ray_origin) / ray_direction
-        t_max = (max_bound - ray_origin) / ray_direction
+        t_min = (min_bound - ray.origin) / ray.direction
+        t_max = (max_bound - ray.origin) / ray.direction
 
         t1 = np.minimum(t_min, t_max)
         t2 = np.maximum(t_min, t_max)
