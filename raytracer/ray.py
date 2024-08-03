@@ -2,18 +2,13 @@ import numpy as np
 
 class Ray:
     def __init__(self, origin, direction):
-        """
-        Initialize a ray with an origin and direction.
-        """
-        self.origin = np.array(origin)
-        self.direction = np.array(direction)
-        self.direction = self.direction / np.linalg.norm(self.direction)  # Normalize direction
+        self.origin = np.array(origin, dtype="float")
+        self.v = np.array(direction, dtype="float")
+        self.v = self.v / np.linalg.norm(self.v)
 
-    def at(self, t):
-        """
-        Compute the point at a given distance along the ray.
-        """
-        return self.origin + t * self.direction
-
-    def __repr__(self):
-        return f"Ray(origin={self.origin}, direction={self.direction})"
+    @classmethod
+    def ray_from_camera(cls, camera, i, j, img):
+        p = camera.screen_center + (j - img.img_width // 2) * img.ratio * camera.right - (i - img.img_height // 2) * img.ratio * camera.up_vector
+        direction = p - camera.position
+        direction = direction / np.linalg.norm(direction)
+        return cls(camera.position, direction)
