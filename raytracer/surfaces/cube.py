@@ -1,57 +1,58 @@
+from surfaces.surface import Surface
 import numpy as np
+from intersection import Intersection
+from surfaces.infinite_plane import InfinitePlane
 
-class Cube:
+from config import EPSILON
+
+
+class Cube(Surface):
     def __init__(self, position, scale, material_index):
-        self.position = np.array(position)
+        super(Cube, self).__init__(material_index)
+        self.position = np.array(position, dtype="float")
         self.scale = scale
-        self.material_index = material_index
+        self.min = self.position - self.scale / 2
+        self.max = self.position + self.scale / 2
+        self.planes = [
+            InfinitePlane(np.array([1, 0, 0], dtype="float"), self.position[0] + self.scale / 2, self.material_index),
+            InfinitePlane(np.array([-1, 0, 0], dtype="float"), -(self.position[0] - self.scale / 2),
+                          self.material_index),
+            InfinitePlane(np.array([0, 1, 0], dtype="float"), self.position[1] + self.scale / 2, self.material_index),
+            InfinitePlane(np.array([0, -1, 0], dtype="float"), -(self.position[1] - self.scale / 2),
+                          self.material_index),
+            InfinitePlane(np.array([0, 0, 1], dtype="float"), self.position[2] + self.scale / 2, self.material_index),
+            InfinitePlane(np.array([0, 0, -1], dtype="float"), -(self.position[2] - self.scale / 2),
+                          self.material_index)]
 
-    def intersect(self, ray):
-        """
-        Check for intersection between a ray and the cube.
-        Returns the intersection distance if intersected, otherwise returns None.
-        """
-        # Define cube bounds
-        min_bound = self.position - self.scale / 2
-        max_bound = self.position + self.scale / 2
+    def get_intersection_with_ray(self, ray):
 
-        t_min = (min_bound - ray.origin) / ray.direction
-        t_max = (max_bound - ray.origin) / ray.direction
+        with np.errstate(divide='ignore'):  # division by zero is ok.
+            t_min = (self.min - ray.origin) / ray.v
+            t_max = (self.max - ray.origin) / ray.v
+            t_enter = np.max(np.minimum(t_min, t_max))
+            t_exit = np.min(np.maximum(t_min, t_max))
+            if t_enter > t_exit:
+                return None
+            return Intersection(self, ray, t_enter)
 
-        t1 = np.minimum(t_min, t_max)
-        t2 = np.maximum(t_min, t_max)
+    def get_intersection_with_rays(self, rays):
+        rays_v = np.array([ray.v for ray in rays])
+        rays_origin = np.array([ray.origin for ray in rays])
+        with np.errstate(divide='ignore'):  # division by zero is ok.
+            t_min = (self.min - rays_origin) / rays_v
+            t_max = (self.max - rays_origin) / rays_v
+            t_enter = np.max(np.minimum(t_min, t_max), axis=1)
+            t_exit = np.min(np.maximum(t_min, t_max), axis=1)
+            return [Intersection(self, rays[i], t_enter[i]) if t_exit[i] >= t_enter[i] else None for i in
+                    range(len(rays))]
 
-        t_near = np.max(t1)
-        t_far = np.min(t2)
-
-        if t_near > t_far or t_far < 0:
-            return None
-
-        return t_near
+    def in_cube(self, point):
+        for i in range(3):
+            if not (self.position[i] - self.scale / 2 <= point[i] <= self.position[i] + self.scale / 2):
+                return False
+        return True
 
     def get_normal(self, point):
-        """
-        Compute the normal of the cube at a given point.
-        """
-        min_bound = self.position - self.scale / 2
-        max_bound = self.position + self.scale / 2
-
-        # Determine which face the point is on
-        if abs(point[0] - min_bound[0]) < 1e-6:
-            return np.array([-1, 0, 0])
-        elif abs(point[0] - max_bound[0]) < 1e-6:
-            return np.array([1, 0, 0])
-        elif abs(point[1] - min_bound[1]) < 1e-6:
-            return np.array([0, -1, 0])
-        elif abs(point[1] - max_bound[1]) < 1e-6:
-            return np.array([0, 1, 0])
-        elif abs(point[2] - min_bound[2]) < 1e-6:
-            return np.array([0, 0, -1])
-        elif abs(point[2] - max_bound[2]) < 1e-6:
-            return np.array([0, 0, 1])
-        else:
-            raise ValueError("Point is not on the surface of the cube.")
-
-    def __repr__(self):
-        return (f"Cube(position={self.position}, scale={self.scale}, "
-                f"material_index={self.material_index})")
+        for plane in self.planes:
+            if abs(np.dot(plane.normal, point) - plane.offset) < EPSILON:
+                return plane.normal
