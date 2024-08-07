@@ -13,7 +13,7 @@ from imageconstructor import ImageConstructor
 import numpy as np
 import time
 
-from config import EPSILON
+from utils import EPSILON
 
 def parse_scene_file(file_path):
     surfaces = []
@@ -60,8 +60,8 @@ def save_image(image_array, img_name):
 def main():
     start = time.time()
     parser = argparse.ArgumentParser(description='Python Ray Tracer')
-    parser.add_argument('scene_file', type=str, default='./scenes/Room.txt', help='Path to the scene file')
-    parser.add_argument('output_image', type=str, default='./output/try1.png', help='Name of the output image file')
+    parser.add_argument('scene_file', type=str, default='./scenes/scence1.txt', help='Path to the scene file')
+    parser.add_argument('output_image', type=str, default='./output/output1.png', help='Name of the output image file')
     parser.add_argument('--width', type=int, default=500, help='Image width')
     parser.add_argument('--height', type=int, default=500, help='Image height')
     parser.add_argument('--bonus', type=int, default=-1, help='Bonus (-1 for  no bonus, 1 for bonus without coloring and 2 for bonus with coloring)')

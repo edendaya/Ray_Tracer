@@ -3,6 +3,8 @@ from lightcalc import LightCalc
 from calcintersections import CalcIntersections
 from ray import Ray
 
+import utils
+
 class ColorCalc:
     def __init__(self, scene):
         self.scene = scene
@@ -27,10 +29,13 @@ class ColorCalc:
             # Compute normal and light direction
             N = intersection.surface.get_normal(intersection.hit_point)
             L = light.position - intersection.hit_point
-            L_norm = np.linalg.norm(L)
-            if L_norm == 0:
+            if not np.any(L):
                 continue
-            L /= L_norm
+            L = utils.normalize(L)
+            #L_norm = np.linalg.norm(L)
+            #if L_norm == 0:
+            #    continue
+            #L /= L_norm
             N_L_dot = N @ L
             if N_L_dot <= 0:
                 continue

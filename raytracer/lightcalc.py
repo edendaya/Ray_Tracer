@@ -2,7 +2,7 @@ import numpy as np
 from ray import Ray
 from calcintersections import CalcIntersections
 
-from config import EPSILON
+from utils import EPSILON
 
 class LightCalc:
     def __init__(self, scene):

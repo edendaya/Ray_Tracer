@@ -1,6 +1,6 @@
 import numpy as np
 
-from config import EPSILON
+from utils import EPSILON
 
 class CalcIntersections:
     def __init__(self, scene):

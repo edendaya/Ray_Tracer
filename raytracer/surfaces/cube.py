@@ -3,7 +3,7 @@ import numpy as np
 from intersection import Intersection
 from surfaces.infinite_plane import InfinitePlane
 
-from config import EPSILON
+from utils import EPSILON
 
 
 class Cube(Surface):

@@ -2,19 +2,19 @@ from surfaces.surface import Surface
 import numpy as np
 from intersection import Intersection
 
-from config import EPSILON
+import utils
 
 
 class InfinitePlane(Surface):
     def __init__(self, normal, offset, material_index):
         super(InfinitePlane, self).__init__(material_index)
-        self.normal = np.array(normal, dtype="float")
+        self.normal = utils.normlize(np.array(normal, dtype="float"))
         self.normal /= np.linalg.norm(self.normal)
         self.offset = offset
 
     def get_intersection_with_ray(self, ray):
         dot_prod = self.normal @ ray.v
-        if abs(dot_prod) < EPSILON:
+        if abs(dot_prod) < utils.EPSILON:
             # ray is parallel to the plane
             return None
         t = ((self.offset * self.normal - ray.origin) @ self.normal) / dot_prod

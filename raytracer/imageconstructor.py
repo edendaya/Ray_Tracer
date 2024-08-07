@@ -2,7 +2,7 @@ from calcintersections import CalcIntersections
 from ray import Ray
 from colorcalc import ColorCalc
 
-from config import EPSILON
+from utils import EPSILON
 
 class ImageConstructor:
     def __init__(self, scene):
