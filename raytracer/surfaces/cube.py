@@ -3,7 +3,7 @@ import numpy as np
 from intersection import Intersection
 from surfaces.infinite_plane import InfinitePlane
 
-from utils import EPSILON
+from utils import EPSILON, x_axis, y_axis, z_axis
 
 
 class Cube(Surface):
@@ -13,16 +13,11 @@ class Cube(Surface):
         self.scale = scale
         self.min = self.position - self.scale / 2
         self.max = self.position + self.scale / 2
-        self.planes = [
-            InfinitePlane(np.array([1, 0, 0], dtype="float"), self.position[0] + self.scale / 2, self.material_index),
-            InfinitePlane(np.array([-1, 0, 0], dtype="float"), -(self.position[0] - self.scale / 2),
-                          self.material_index),
-            InfinitePlane(np.array([0, 1, 0], dtype="float"), self.position[1] + self.scale / 2, self.material_index),
-            InfinitePlane(np.array([0, -1, 0], dtype="float"), -(self.position[1] - self.scale / 2),
-                          self.material_index),
-            InfinitePlane(np.array([0, 0, 1], dtype="float"), self.position[2] + self.scale / 2, self.material_index),
-            InfinitePlane(np.array([0, 0, -1], dtype="float"), -(self.position[2] - self.scale / 2),
-                          self.material_index)]
+        all_axes = [x_axis, y_axis, z_axis]
+        self.planes = [self.calc_plane(all_axes[i], i, d) for d in [1, -1] for i in range(3)]
+
+    def calc_plane(self, axis, index, direction):
+        return InfinitePlane(direction * axis, direction * (self.position[index] - self.scale / 2), self.material_index)
 
     def get_intersection_with_ray(self, ray):
 
@@ -53,6 +48,6 @@ class Cube(Surface):
         return True
 
     def get_normal(self, point):
-        for plane in self.planes:
+        for plane in [self.planes]:
             if abs(np.dot(plane.normal, point) - plane.offset) < EPSILON:
                 return plane.normal

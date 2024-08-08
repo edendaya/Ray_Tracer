@@ -1,6 +1,7 @@
 import numpy as np
 from surfaces.surface import Surface
 from intersection import Intersection
+from utils import normalize
 
 class Sphere(Surface):
     def __init__(self, position, radius, material_index):
@@ -54,5 +55,4 @@ class Sphere(Surface):
         return [Intersection(self, rays[i], t[i]) if (not illegals[i]) and t[i] is not None else None for i in range(len(rays))]
 
     def get_normal(self, point):
-        N = point - self.position
-        return N / np.linalg.norm(N)
+        return normalize(point - self.position)

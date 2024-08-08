@@ -1,5 +1,9 @@
 import argparse
 from PIL import Image
+
+from intersectionscalculator import IntersectionsCalculator
+from colorcalculator import ColorCalculator
+from ray import Ray
 from scene import Scene
 from camera import Camera
 from img import Img
@@ -9,7 +13,7 @@ from scene_settings import SceneSettings
 from surfaces.cube import Cube
 from surfaces.infinite_plane import InfinitePlane
 from surfaces.sphere import Sphere
-from imageconstructor import ImageConstructor
+#from imageconstructor import ImageConstructor
 import numpy as np
 import time
 
@@ -72,9 +76,18 @@ def main():
     camera, scene_settings, surfaces, materials, lights = parse_scene_file(args.scene_file)
     image = Img(args.width, args.height, camera.screen_width)
     scene = Scene(camera, scene_settings, surfaces, materials, lights, image)
-    image_constructor = ImageConstructor(scene)
     res = np.zeros((args.height, args.width, 3), dtype='float')
-    image_array = image_constructor.construct_image(res)
+    ray_tracer = IntersectionsCalculator(scene)
+    color_calculator = ColorCalculator(scene)
+
+    for i in range(image.img_height):
+        for j in range(image.img_width):
+            ray = Ray.ray_from_camera(scene.camera, i, j, scene.image)
+            intersections = ray_tracer.find_all_ray_intersections_sorted(ray)
+            color = color_calculator.get_ray_color(intersections)
+            res[i, j] = color
+
+    image_array = np.clip(res, 0, 1) * 255
     
     # Save the output image
     save_image(image_array, args.output_image)
