@@ -9,7 +9,7 @@ class Sphere(Surface):
         self.position = np.array(position, dtype="float")
         self.radius = radius
 
-    def get_intersection_with_ray(self, ray):
+    def calc_intersection_with_ray(self, ray):
         ray_to_center = ray.origin - self.position
         a = 1
         b = 2 * (ray.v @ ray_to_center)
@@ -37,9 +37,9 @@ class Sphere(Surface):
             return t1
         return min(t1, t2)
 
-    def get_intersection_with_rays(self, rays):
+    def calculate_intersection_with_rays(self, rays):
         if len(rays) == 1:
-            return [self.get_intersection_with_ray(rays[0])]
+            return [self.calc_intersection_with_ray(rays[0])]
         ray_origins = [ray.origin for ray in rays]
         ray_directions = [ray.v for ray in rays]
         rays_to_center = ray_origins - self.position

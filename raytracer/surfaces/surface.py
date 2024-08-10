@@ -9,10 +9,10 @@ class Surface(ABC):
         return materials[self.material_index - 1]
 
     @abstractmethod
-    def get_intersection_with_ray(self, ray):
+    def calc_intersection_with_ray(self, ray):
         pass
     @abstractmethod
-    def get_intersection_with_rays(self, rays):
+    def calculate_intersection_with_rays(self, rays):
         pass
     @abstractmethod
     def get_normal(self, point):

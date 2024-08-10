@@ -10,7 +10,7 @@ class IntersectionsCalculator:
     def find_all_ray_intersections_sorted(self, ray):
         intersections = []
         for surface in self.surfaces:
-            intersection = surface.get_intersection_with_ray(ray)
+            intersection = surface.calc_intersection_with_ray(ray)
             if intersection is not None and intersection.t > EPSILON:
                 intersections.append(intersection)
         intersections.sort(key=lambda _intersection: _intersection.t)
@@ -20,7 +20,7 @@ class IntersectionsCalculator:
         min_t_values = np.array([float('inf') for r in rays])
         closest_intersections = np.array([None for r in rays])
         for surface in self.surfaces:
-            intersections = np.array(surface.get_intersection_with_rays(rays))
+            intersections = np.array(surface.calculate_intersection_with_rays(rays))
             intersections_t = [intersection.t if intersection is not None else float('inf') for intersection in intersections]
             # make sure values are in range
             new_values = intersections_t < min_t_values

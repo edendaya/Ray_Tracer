@@ -11,7 +11,7 @@ class InfinitePlane(Surface):
         self.normal = normalize(np.array(normal, dtype="float"))
         self.offset = offset
 
-    def get_intersection_with_ray(self, ray):
+    def calc_intersection_with_ray(self, ray):
         dot_prod = self.normal @ ray.v
         if abs(dot_prod) < EPSILON:
             # ray is parallel to the plane
@@ -24,7 +24,7 @@ class InfinitePlane(Surface):
 
         return Intersection(self, ray, t)
 
-    def get_intersection_with_rays(self, rays):
+    def calculate_intersection_with_rays(self, rays):
         if len(rays) == 1:
             return [self.get_intersection_with_ray(rays[0])]
         with np.errstate(divide='ignore'):  # division by zero is ok.
@@ -37,9 +37,6 @@ class InfinitePlane(Surface):
             boolean_array = np.logical_or(abs(dot_prods) < EPSILON, t_values < 0)
             return [Intersection(self, rays[i], t_values[i]) if not boolean_array[i] else None for i in
                     range(len(rays))]
-
-    def get_intersection_with_rays_(self, rays):
-        return [self.get_intersection_with_ray(ray) for ray in rays]
 
     def get_normal(self, point):
         return self.normal

@@ -11,13 +11,9 @@ class Cube(Surface):
         super(Cube, self).__init__(material_index)
         self.position = np.array(position, dtype="float")
         self.scale = scale
-        all_axes = [x_axis, y_axis, z_axis]
-        self.planes = [self.calc_plane(all_axes[i], i, d) for d in [1, -1] for i in range(3)]
 
-    def calc_plane(self, axis, index, direction):
-        return InfinitePlane(direction * axis, direction * (self.position[index] - self.scale / 2), self.material_index)
 
-    def get_intersection_with_ray(self, ray):
+    def calc_intersection_with_ray(self, ray):
         min_bound= self.position - self.scale / 2
         max_bound = self.position + self.scale / 2
         with np.errstate(divide='ignore'):  # division by zero is ok.
@@ -29,7 +25,7 @@ class Cube(Surface):
                 return None
             return Intersection(self, ray, t_enter)
 
-    def get_intersection_with_rays(self, rays):
+    def calculate_intersection_with_rays(self, rays):
         min_bound = self.position - self.scale / 2
         max_bound = self.position + self.scale / 2
         rays_v = np.array([ray.v for ray in rays])
@@ -55,22 +51,15 @@ class Cube(Surface):
         """
         min_bound = self.position - self.scale / 2
         max_bound = self.position + self.scale / 2
-
+        all_axes = [x_axis, y_axis, z_axis]
+        for i in range(3):
+            if abs(point[i] - min_bound[i]) < 1e-6:
+                return np.array(all_axes[i] * -1)
+            elif abs(point[i] - max_bound[i]) < 1e-6:
+                return np.array(all_axes[i])
         # Determine which face the point is on
-        if abs(point[0] - min_bound[0]) < 1e-6:
-            return np.array([-1, 0, 0])
-        elif abs(point[0] - max_bound[0]) < 1e-6:
-            return np.array([1, 0, 0])
-        elif abs(point[1] - min_bound[1]) < 1e-6:
-            return np.array([0, -1, 0])
-        elif abs(point[1] - max_bound[1]) < 1e-6:
-            return np.array([0, 1, 0])
-        elif abs(point[2] - min_bound[2]) < 1e-6:
-            return np.array([0, 0, -1])
-        elif abs(point[2] - max_bound[2]) < 1e-6:
-            return np.array([0, 0, 1])
-        else:
-            raise ValueError("Point is not on the surface of the cube.")
+        raise ValueError("Point is not on the surface of the cube.")
+
 
     def __repr__(self):
         return (f"Cube(position={self.position}, scale={self.scale}, "
