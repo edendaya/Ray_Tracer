@@ -51,7 +51,7 @@ class ColorCalculator:
                 continue
 
             # Get light intensity and color
-            light_intensity, light_color = self.light_calc.get_light_intensity_batch(light, intersection)
+            light_intensity, light_color = self.light_calc.calculate_light_intensity(light, intersection)
 
             # Compute reflected light direction
             light_ray = Ray(light.position, -L)

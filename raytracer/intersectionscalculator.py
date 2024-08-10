@@ -2,6 +2,7 @@ import numpy as np
 
 from utils import EPSILON
 
+
 class IntersectionsCalculator:
     def __init__(self, scene):
         self.surfaces = scene.surfaces
@@ -16,8 +17,8 @@ class IntersectionsCalculator:
         return intersections
 
     def find_closest_rays_intersections_batch(self, rays):
-        min_t_values = np.array([float('inf') for _ in rays])
-        closest_intersections = np.array([None for _ in rays])
+        min_t_values = np.array([float('inf') for r in rays])
+        closest_intersections = np.array([None for r in rays])
         for surface in self.surfaces:
             intersections = np.array(surface.get_intersection_with_rays(rays))
             intersections_t = [intersection.t if intersection is not None else float('inf') for intersection in intersections]

@@ -7,6 +7,6 @@ class Ray:
 
     @classmethod
     def ray_from_camera(cls, camera, i, j, img):
-        p = camera.screen_center + (j - img.img_width // 2) * img.ratio * camera.right - (i - img.img_height // 2) * img.ratio * camera.up_vector
+        p = camera.screen_center + (img.img_width // 2 - j) * img.ratio * camera.right - (i - img.img_height // 2) * img.ratio * camera.up_vector
         direction = normalize(p - camera.position)
         return cls(camera.position, direction)

@@ -10,7 +10,7 @@ class LightCalculator:
         self.settings = scene.scene_settings
         self.instructions_calculator = IntersectionsCalculator(scene)
 
-    def get_light_intensity_batch(self, light, intersection):
+    def calculate_light_intensity(self, light, intersection):
         plane_normal = utils.normalize(intersection.hit_point - light.position)
         transform_matrix = self.xy_to_general_plane(plane_normal, light.position)
 
@@ -38,6 +38,7 @@ class LightCalculator:
         light_intensity = (1 - light.shadow_intensity) + light.shadow_intensity * (
                 c / (self.settings.root_number_shadow_rays ** 2))
         return light_intensity, light.color
+
 
     @staticmethod
     def xy_to_general_plane(plane_normal, plane_point):
