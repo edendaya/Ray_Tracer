@@ -1,7 +1,6 @@
 from surfaces.surface import Surface
 import numpy as np
 from intersection import Intersection
-from surfaces.infinite_plane import InfinitePlane
 
 from utils import EPSILON, x_axis, y_axis, z_axis
 
