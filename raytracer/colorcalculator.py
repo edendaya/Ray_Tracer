@@ -14,7 +14,7 @@ class ColorCalculator:
         self.light_calc = LightCalculator(scene)
         self.intersections_calculator = IntersectionsCalculator(scene)
 
-    def get_diffuse_and_specular_color(self, intersection):
+    def calculate_diffuse_and_specular_color(self, intersection):
         if intersection is None:
             return self.settings.background_color
 
@@ -55,7 +55,7 @@ class ColorCalculator:
 
             # Compute reflected light direction
             light_ray = Ray(light.position, -L)
-            R = intersection.surface.get_reflected_ray(light_ray, intersection.hit_point).v
+            R = intersection.surface.get_reflected_ray(light_ray, intersection.hit_point).vec
 
             # Accumulate diffuse and specular components
             dif_sum += light_color * light_intensity * N_L_dot
@@ -69,7 +69,7 @@ class ColorCalculator:
         # Return combined color
         return diffuse_color + specular_color
 
-    def get_ray_color(self, intersections, reflection_rec_level=0):
+    def calculate_ray_color(self, intersections, reflection_rec_level=0):
         if intersections is None or len(intersections) == 0:
             return self.settings.background_color
 
@@ -84,8 +84,8 @@ class ColorCalculator:
         for intersection in reversed(intersections):
             material = intersection.surface.get_material(self.materials)
             transparency = material.transparency
-            d_s_color = self.get_diffuse_and_specular_color(intersection)
-            reflection_color = self.get_reflection_color(intersection, reflection_rec_level) * \
+            d_s_color = self.calculate_diffuse_and_specular_color(intersection)
+            reflection_color = self.calculate_reflection_color(intersection, reflection_rec_level) * \
                                material.reflection_color
 
             color = ((1 - transparency) * d_s_color + transparency * bg_color) + reflection_color
@@ -93,9 +93,9 @@ class ColorCalculator:
 
         return color
 
-    def get_reflection_color(self, intersection, reflection_rec_level):
+    def calculate_reflection_color(self, intersection, reflection_rec_level):
         if reflection_rec_level >= self.settings.max_recursions:
             return self.settings.background_color
         reflection_ray = intersection.surface.get_reflected_ray(intersection.ray, intersection.hit_point)
-        intersections = self.intersections_calculator.find_all_ray_intersections_sorted(reflection_ray)
-        return self.get_ray_color(intersections, reflection_rec_level + 1)
+        intersections = self.intersections_calculator.find_all_intersections_with_ray_sorted(reflection_ray)
+        return self.calculate_ray_color(intersections, reflection_rec_level + 1)

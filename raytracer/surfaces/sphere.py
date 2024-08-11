@@ -3,16 +3,17 @@ from surfaces.surface import Surface
 from intersection import Intersection
 from utils import normalize
 
+
 class Sphere(Surface):
     def __init__(self, position, radius, material_index):
         super(Sphere, self).__init__(material_index)
-        self.position = np.array(position, dtype="float")
+        self.position = np.array(position, dtype=np.float64)
         self.radius = radius
 
     def calc_intersection_with_ray(self, ray):
         ray_to_center = ray.origin - self.position
         a = 1
-        b = 2 * (ray.v @ ray_to_center)
+        b = 2 * (ray.vec @ ray_to_center)
         c = (ray_to_center @ ray_to_center) - self.radius ** 2
         disc = b ** 2 - 4 * a * c
         if disc <= 0:
@@ -41,7 +42,7 @@ class Sphere(Surface):
         if len(rays) == 1:
             return [self.calc_intersection_with_ray(rays[0])]
         ray_origins = [ray.origin for ray in rays]
-        ray_directions = [ray.v for ray in rays]
+        ray_directions = [ray.vec for ray in rays]
         rays_to_center = ray_origins - self.position
         b_values = 2 * np.einsum('ij, ij -> i', ray_directions, rays_to_center)
         c_values = np.einsum('ij, ij -> i', rays_to_center, rays_to_center) - self.radius ** 2

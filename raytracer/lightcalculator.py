@@ -32,7 +32,7 @@ class LightCalculator:
         light_points = (transform_matrix @ rectangle_points)[:3].T
 
         rays = [Ray(point, intersection.hit_point - point) for point in light_points]
-        light_hits = self.instructions_calculator.find_closest_rays_intersections_batch(rays)
+        light_hits = self.instructions_calculator.find_closest_intersections_with_rays(rays)
         c = sum(1 for light_hit in light_hits if light_hit is not None and
                 np.linalg.norm(intersection.hit_point - light_hit.hit_point) < utils.EPSILON)
         light_intensity = (1 - light.shadow_intensity) + light.shadow_intensity * (
@@ -57,14 +57,11 @@ class LightCalculator:
                                 (sin_theta * np.array([
                                     [0, -rotation_axis[2], rotation_axis[1]],
                                     [rotation_axis[2], 0, -rotation_axis[0]],
-                                    [-rotation_axis[1], rotation_axis[0], 0]
-                                ], dtype="float") +
-                                (1 - cos_theta) * np.outer(rotation_axis, rotation_axis)
-                                )
+                                    [-rotation_axis[1], rotation_axis[0], 0]], dtype=np.float64) +
+                                (1 - cos_theta) * np.outer(rotation_axis, rotation_axis))
 
         translation_matrix = np.eye(4)
         translation_matrix[:3, 3] = plane_point
 
         transformation_matrix = np.matmul(translation_matrix, rotation_matrix)
-
         return transformation_matrix

@@ -7,7 +7,7 @@ class IntersectionsCalculator:
     def __init__(self, scene):
         self.surfaces = scene.surfaces
 
-    def find_all_ray_intersections_sorted(self, ray):
+    def find_all_intersections_with_ray_sorted(self, ray):
         intersections = []
         for surface in self.surfaces:
             intersection = surface.calc_intersection_with_ray(ray)
@@ -16,7 +16,7 @@ class IntersectionsCalculator:
         intersections.sort(key=lambda _intersection: _intersection.t)
         return intersections
 
-    def find_closest_rays_intersections_batch(self, rays):
+    def find_closest_intersections_with_rays(self, rays):
         min_t_values = np.array([float('inf') for r in rays])
         closest_intersections = np.array([None for r in rays])
         for surface in self.surfaces:

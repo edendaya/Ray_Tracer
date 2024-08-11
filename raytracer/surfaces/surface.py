@@ -20,8 +20,8 @@ class Surface(ABC):
 
     def get_reflected_ray(self, ray, point):
         surf_normal = self.get_normal(point)
-        cos_a = ray.v @ surf_normal
-        reflection_dir = ray.v - 2 * cos_a * surf_normal
+        cos_a = ray.vec @ surf_normal
+        reflection_dir = ray.vec - 2 * cos_a * surf_normal
         return Ray(point, reflection_dir)
 
 
